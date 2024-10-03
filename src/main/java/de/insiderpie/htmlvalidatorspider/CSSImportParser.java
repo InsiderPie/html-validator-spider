@@ -1,6 +1,5 @@
 package de.insiderpie.htmlvalidatorspider;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,11 +15,11 @@ public class CSSImportParser {
      * (supports or media queries). Imports after the first CSS statement
      * are ignored as per the CSS specification.
      */
-    public static HashSet<String> parse(String css) throws IOException {
+    public static HashSet<String> parse(String css) {
         HashSet<String> urls = new HashSet<>();
         String[] uncommentedParts = commentPattern.split(css);
         for (String part : uncommentedParts) {
-            int endIndex = indexOfFirstUnescapedOpenBracket(css);
+            int endIndex = indexOfFirstUnescapedOpenBracket(part);
             if (endIndex != -1) {
                 part = part.substring(0, endIndex);
             }

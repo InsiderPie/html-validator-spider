@@ -1,6 +1,5 @@
 package de.insiderpie.htmlvalidatorspider;
 
-import java.io.IOException;
 import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -8,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CSSImportParserTest {
 
     @org.junit.jupiter.api.Test
-    void parseSingleImport() throws IOException {
+    void parseSingleImport() {
         String css = "@import url(\"https://example.com/index.css\");";
         HashSet<String> expected = new HashSet<>();
         expected.add("https://example.com/index.css");
@@ -19,7 +18,7 @@ class CSSImportParserTest {
     }
 
     @org.junit.jupiter.api.Test
-    void parseTwoImports() throws IOException {
+    void parseTwoImports() {
         String css = """
             @import url("https://example.com/base.css");
             @import url("https://example.com/index.css");
@@ -34,7 +33,7 @@ class CSSImportParserTest {
     }
 
     @org.junit.jupiter.api.Test
-    void parseImportsWithLayer() throws IOException {
+    void parseImportsWithLayer() {
         String css = """
             @import url("https://example.com/base.css") layer(base);
             @import url("https://example.com/index.css");
@@ -49,7 +48,7 @@ class CSSImportParserTest {
     }
 
     @org.junit.jupiter.api.Test
-    void parseImportsWithCondition() throws IOException {
+    void parseImportsWithCondition() {
         String css = """
             @import url("https://example.com/grid-layout.css") supports(display: grid);
             @import url("https://example.com/high-contrast.css") prefers-contrast(more);
@@ -66,7 +65,7 @@ class CSSImportParserTest {
     }
 
     @org.junit.jupiter.api.Test
-    void parseImportsAfterCharset() throws IOException {
+    void parseImportsAfterCharset() {
         String css = """
             @charset(utf-8);
             @import url("https://example.com/index.css");
@@ -80,9 +79,26 @@ class CSSImportParserTest {
     }
 
     @org.junit.jupiter.api.Test
-    void ignoreImportsAfterFirstCSSRule() throws IOException {
+    void ignoreImportsAfterFirstCSSRule() {
         String css = """
             @charset(utf-8);
+            @import url("https://example.com/index.css");
+            :root { }
+            @import url("https://example.com/ignored.css");
+        """;
+        HashSet<String> expected = new HashSet<>();
+        expected.add("https://example.com/index.css");
+
+        HashSet<String> actual = CSSImportParser.parse(css);
+
+        assertEquals(expected, actual);
+    }
+
+    @org.junit.jupiter.api.Test
+    void ignoreComments() {
+        String css = """
+            @charset(utf-8);
+            /** @import url("https://example.com/comment.css");  */
             @import url("https://example.com/index.css");
             :root { }
             @import url("https://example.com/ignored.css");
