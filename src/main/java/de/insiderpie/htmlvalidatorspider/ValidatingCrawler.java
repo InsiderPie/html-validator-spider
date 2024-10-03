@@ -25,12 +25,13 @@ import java.util.Optional;
 
 public class ValidatingCrawler {
 
-    private static final String userAgent = "de.insiderpie.htmlvalidatorspider/v1.0.0 java/" + System.getProperty("java.version");
+    private static final String userAgent = "de.insiderpie.htmlvalidatorspider/1.0.0 java/" + System.getProperty("java.version");
     private final URI baseURI;
     private final CrawlFrontier htmlURIs;
     private final CrawlFrontier cssURIs;
 
     private boolean treatWarningsAsErrors = false;
+    private boolean ignoreCSS = false;
 
     public URI getBaseURI() {
         return baseURI;
@@ -42,6 +43,14 @@ public class ValidatingCrawler {
 
     public void setTreatWarningsAsErrors(boolean treatWarningsAsErrors) {
         this.treatWarningsAsErrors = treatWarningsAsErrors;
+    }
+
+    public boolean isIgnoreCSS() {
+        return ignoreCSS;
+    }
+
+    public void setIgnoreCSS(boolean ignoreCSS) {
+        this.ignoreCSS = ignoreCSS;
     }
 
     public ValidatingCrawler(URI baseURI) {
@@ -62,7 +71,11 @@ public class ValidatingCrawler {
             URI uri = htmlURIs.next();
             String content = null;
             try {
-                content = loadURIAsHTML(uri);
+                Optional<String> optionalContent = loadURIIfContentIsHTML(uri);
+                if (optionalContent.isEmpty()) {
+                    continue;
+                }
+                content = optionalContent.get();
                 List<SAXParseException> parseErrors = validateHTML(uri, content);
                 validationResults.add(ValidationResult.fromSAXParseErrors(uri, parseErrors));
             } catch (Exception e) {
@@ -102,7 +115,9 @@ public class ValidatingCrawler {
             Document document = documentBuilder.parse(inputSource);
             document.setDocumentURI(uri.toString());
             discoverNewHTMLLinks(document);
-            discoverNewCSSLinks(document);
+            if (!ignoreCSS) {
+                discoverNewCSSLinks(document);
+            }
         } catch (Exception e) {
             System.err.printf("ERROR: could not discover links from %s: %s%n", uri, e.getMessage());
         }
@@ -165,13 +180,9 @@ public class ValidatingCrawler {
     }
 
     private void parseCSSAndDiscoverImports(URI uri, String content) {
-        try {
-            HashSet<String> imports = CSSImportParser.parse(content);
-            for (String importURL : imports) {
-                tryEnqueueCSSUrl(importURL, uri);
-            }
-        } catch (Exception e) {
-            System.err.printf("ERROR: could not discover links from %s: %s%n", uri, e.getMessage());
+        HashSet<String> imports = CSSImportParser.parse(content);
+        for (String importURL : imports) {
+            tryEnqueueCSSUrl(importURL, uri);
         }
     }
 
@@ -184,35 +195,50 @@ public class ValidatingCrawler {
         }
     }
 
-    private static String loadURIAsHTML(URI uri) throws NotAcceptableException, IOException, InterruptedException, MIMETypeSyntaxException {
-        return loadContentFromURI(uri, "text/html");
+    private static Optional<String> loadURIIfContentIsHTML(URI uri) throws NotAcceptableException, IOException, InterruptedException, MIMETypeSyntaxException {
+        HttpResponse<String> response = loadURIAsString(uri, "text/html");
+        if (!isContentType(response, "text/html")) {
+            return Optional.empty();
+        }
+        return Optional.of(response.body());
     }
 
     private static String loadURIAsCSS(URI uri) throws NotAcceptableException, IOException, InterruptedException, MIMETypeSyntaxException {
-        return loadContentFromURI(uri, "text/css");
+        HttpResponse<String> response = loadURIAsString(uri, "text/css");
+        assertContentTypeIs(response, "text/css");
+        return response.body();
     }
 
-    private static String loadContentFromURI(URI uri, String accept) throws IOException, InterruptedException, NotAcceptableException, MIMETypeSyntaxException {
+    private static HttpResponse<String> loadURIAsString(URI uri, String accept) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest
                 .newBuilder(uri)
                 .GET()
                 .header("accept", accept)
                 .header("user-agent", userAgent)
                 .build();
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        validateResponseContentType(accept, response);
-        return response.body();
+        HttpClient client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .build();
+        return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private static void validateResponseContentType(String accept, HttpResponse response) throws MIMETypeSyntaxException, NotAcceptableException {
+    private static boolean isContentType(HttpResponse response, String expected) throws MIMETypeSyntaxException {
         Optional<String> contentType = response.headers().firstValue("content-type");
         if (contentType.isEmpty()) {
-            throw new NotAcceptableException("(empty)", accept);
+            return false;
+        }
+        String essence = MIMETypeParser.getEssence(contentType.get());
+        return Objects.equals(essence, expected);
+    }
+
+    private static void assertContentTypeIs(HttpResponse response, String expected) throws MIMETypeSyntaxException, NotAcceptableException {
+        Optional<String> contentType = response.headers().firstValue("content-type");
+        if (contentType.isEmpty()) {
+            throw new NotAcceptableException("(empty)", expected);
         } else {
             String essence = MIMETypeParser.getEssence(contentType.get());
-            if (!Objects.equals(essence, accept)) {
-                throw new NotAcceptableException(essence, accept);
+            if (!Objects.equals(essence, expected)) {
+                throw new NotAcceptableException(essence, expected);
             }
         }
     }

@@ -9,11 +9,15 @@ public class Main {
     public static void main(String[] args) {
         URI baseURI = getAndValidateBaseURI();
         boolean treatWarningsAsErrors = System.getenv("TREAT_WARNINGS_AS_ERRORS") != null;
+        boolean ignoreCSS = System.getenv("IGNORE_CSS") != null;
 
-        System.err.printf("Base URI: %s%nTreat warnings as errors: %b%n", baseURI, treatWarningsAsErrors);
+        System.err.printf("Base URI: %s%nTreat warnings as errors: %b%nIgnore CSS: %b%n%n",
+                baseURI, treatWarningsAsErrors, ignoreCSS);
 
         ValidatingCrawler crawler = new ValidatingCrawler(baseURI);
         crawler.setTreatWarningsAsErrors(treatWarningsAsErrors);
+        crawler.setIgnoreCSS(ignoreCSS);
+
         List<ValidationResult> results = crawler.runValidation();
         printValidationResults(results);
         System.exit(countValidationErrors(results));
@@ -48,7 +52,7 @@ public class Main {
             if (result.isOk()) {
                 System.out.printf("OK:  %s%n", result.getUri());
             } else {
-                System.out.printf("ERR: %s%n%s%n", result.getUri(), result.getMessage());
+                System.out.printf("ERROR:\t%s%n%s%n", result.getUri(), result.getMessage());
             }
         }
     }
