@@ -27,8 +27,7 @@ You can use the app with docker (recommended) or directly with Maven.
 Run:
 
 ```commandline
-docker build --tag=html-validator-spider .
-docker run -e BASE_URL=... html-validator-spider
+docker run -e BASE_URL=... ghcr.io/insiderpie/html-validator-spider:latest
 ```
 
 Note that the dockerfile automatically builds and uses the latest version of the nu validator from github.
