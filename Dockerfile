@@ -15,3 +15,6 @@ FROM eclipse-temurin:21-jre
 ARG JAR_FILE=/usr/app/target/*.jar
 COPY --from=build $JAR_FILE /app/runner.jar
 ENTRYPOINT java -jar /app/runner.jar
+
+LABEL org.opencontainers.image.source https://github.com/InsiderPie/html-validator-spider
+LABEL description="A Java app that recursively validates HTML pages and CSS files."
