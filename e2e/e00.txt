@@ -1,0 +1,15 @@
+OK:  https://assets.insiderpie.de/html-spider-validator-1.html
+ERROR:	https://assets.insiderpie.de/html-spider-validator-2.html
+L-1:-1 	Element “head” is missing required child element “title”.
+
+ERROR:	https://assets.insiderpie.de/html-spider-validator-3.html
+L20:8 	No “p” element in scope but a “p” end tag seen.
+L7:21 	A “link” element must have an “href” or “imagesrcset” attribute, or both.
+
+ERROR:	https://assets.insiderpie.de/html-spider-validator-1.css
+L8:15 	CSS: “font-family”: Parse Error.
+L12:1 	CSS: Parse Error.
+
+ERROR:	https://assets.insiderpie.de/html-spider-validator-2.css
+L10:50 	CSS: @import are not allowed after any valid statement other than @charset and @import.
+
