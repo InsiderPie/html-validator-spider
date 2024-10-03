@@ -20,7 +20,7 @@ Configuration is done through environment variables:
 
 ## Usage
 
-You can use the app with Docker (recommended) or directly with Maven.
+You can use the app with docker (recommended) or directly with Maven.
 
 ### with docker
 
