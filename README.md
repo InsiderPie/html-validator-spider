@@ -15,7 +15,11 @@ Configuration is done through environment variables:
 
 ## Usage
 
-Run the `de.insiderpie.htmlvalidatorspider.Main` class.
+[Install Apache Maven](https://maven.apache.org/install.html), then run:
+
+```
+mvn package
+```
 
 Validation results will be written to standard output and all other messages to standard error. 
 
