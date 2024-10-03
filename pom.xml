@@ -12,6 +12,11 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.4.2</version>
                 <configuration>
@@ -55,7 +60,6 @@
         </plugins>
     </build>
 
-
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -71,7 +75,7 @@
         <dependency>
             <groupId>nu.validator</groupId>
             <artifactId>validator</artifactId>
-            <version>20.7.2</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
