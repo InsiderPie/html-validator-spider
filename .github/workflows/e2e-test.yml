@@ -1,0 +1,19 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: [ "src/**", "pom.xml", "e2e/**" ]
+  pull_request:
+    branches: [ "main" ]
+    paths: [ "src/**", "pom.xml", "e2e/**" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run E2E tests
+      run: ./e2e/e2e-test.sh
