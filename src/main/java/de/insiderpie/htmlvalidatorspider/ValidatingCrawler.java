@@ -199,11 +199,10 @@ public class ValidatingCrawler {
                 .header("accept", accept)
                 .header("user-agent", userAgent)
                 .build();
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            validateResponseContentType(accept, response);
-            return response.body();
-        }
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        validateResponseContentType(accept, response);
+        return response.body();
     }
 
     private static void validateResponseContentType(String accept, HttpResponse response) throws MIMETypeSyntaxException, NotAcceptableException {
