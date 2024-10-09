@@ -66,4 +66,4 @@ To run end-to-end tests, install docker, then run:
 
 ## License
 
-Apache-2.0
+Apache-2.0 &copy; [InsiderPie](https://insiderpie.de)
